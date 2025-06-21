@@ -1,9 +1,12 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Speech to Text App',
-  description: 'A Next.js app with OpenAI Whisper speech transcription',
+  description: 'A Next.js app with Web Speech API speech transcription',
 }
 
 export default function RootLayout({
@@ -13,9 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        {children}
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   )
 } 
