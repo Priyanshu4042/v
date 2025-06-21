@@ -12,6 +12,10 @@ interface ChatMessage {
   singleRecommendation?: string
   tenRecommendations?: string
   conversationCount?: number
+  aiResponse?: string
+  isAskingQuestion?: boolean
+  conversationComplete?: boolean
+  userPreferences?: any
 }
 
 interface ChatWindowProps {
@@ -25,6 +29,10 @@ interface ChatWindowProps {
   recommendationError: string | null
   conversationCount: number
   onClear: () => void
+  conversationHistory: ChatMessage[]
+  isAskingQuestion: boolean
+  conversationComplete: boolean
+  userPreferences: any
 }
 
 export function ChatWindow({
@@ -37,7 +45,11 @@ export function ChatWindow({
   isLoadingRecommendation,
   recommendationError,
   conversationCount,
-  onClear
+  onClear,
+  conversationHistory,
+  isAskingQuestion,
+  conversationComplete,
+  userPreferences
 }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -52,23 +64,15 @@ export function ChatWindow({
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
       const recognition = new SpeechRecognition()
       
-      recognition.continuous = true
-      recognition.interimResults = true
+      // Simple, reliable configuration
+      recognition.continuous = false
+      recognition.interimResults = false
       recognition.lang = 'en-US'
       
       recognition.onresult = (event: any) => {
-        let finalTranscript = ''
-        
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript
-          }
-        }
-        
-        if (finalTranscript) {
-          onTranscription(finalTranscript)
-        }
+        const transcript = event.results[0][0].transcript
+        console.log('Speech recognized:', transcript)
+        onTranscription(transcript)
       }
       
       recognition.onerror = (event: any) => {
@@ -77,45 +81,25 @@ export function ChatWindow({
       }
       
       recognition.onend = () => {
+        console.log('Speech recognition ended')
         setIsRecording(false)
       }
       
+      recognition.onstart = () => {
+        console.log('Speech recognition started')
+      }
+      
       recognitionRef.current = recognition
+    } else {
+      console.error('Web Speech API not supported')
+      setIsSupported(false)
     }
   }, [onTranscription, setIsRecording])
 
-  // Add user message when transcription changes
+  // Update messages when conversation history changes
   useEffect(() => {
-    if (transcription && transcription.trim().length > 0) {
-      const newMessage: ChatMessage = {
-        id: Date.now().toString(),
-        text: transcription,
-        isUser: true,
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, newMessage])
-    }
-  }, [transcription])
-
-  // Add AI response when recommendations are ready
-  useEffect(() => {
-    if (singleRecommendation || tenRecommendations || recommendationError) {
-      const responseText = recommendationError 
-        ? `Sorry, I couldn't get movie recommendations right now. ${recommendationError}`
-        : `Here are some movie recommendations based on what you said!`
-
-      const newMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        text: responseText,
-        isUser: false,
-        timestamp: new Date(),
-        singleRecommendation: singleRecommendation || undefined,
-        tenRecommendations: tenRecommendations || undefined,
-        conversationCount
-      }
-      setMessages(prev => [...prev, newMessage])
-    }
-  }, [singleRecommendation, tenRecommendations, recommendationError, conversationCount])
+    setMessages(conversationHistory)
+  }, [conversationHistory])
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -124,15 +108,27 @@ export function ChatWindow({
 
   const startRecording = useCallback(() => {
     if (recognitionRef.current && !isRecording) {
-      recognitionRef.current.start()
-      setIsRecording(true)
+      try {
+        console.log('Starting speech recognition...')
+        recognitionRef.current.start()
+        setIsRecording(true)
+      } catch (error) {
+        console.error('Error starting speech recognition:', error)
+        setIsRecording(false)
+      }
     }
   }, [isRecording, setIsRecording])
 
   const stopRecording = useCallback(() => {
     if (recognitionRef.current && isRecording) {
-      recognitionRef.current.stop()
-      setIsRecording(false)
+      try {
+        console.log('Stopping speech recognition...')
+        recognitionRef.current.stop()
+        setIsRecording(false)
+      } catch (error) {
+        console.error('Error stopping speech recognition:', error)
+        setIsRecording(false)
+      }
     }
   }, [isRecording, setIsRecording])
 
@@ -214,6 +210,52 @@ export function ChatWindow({
                 timestamp={message.timestamp.toLocaleTimeString()}
               />
               
+              {/* Show conversation status indicators */}
+              {!message.isUser && message.isAskingQuestion && (
+                <div className="mt-2 ml-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <div className="flex items-center text-blue-300 text-sm">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    AI is asking a question - please respond
+                  </div>
+                </div>
+              )}
+              
+              {!message.isUser && message.conversationComplete && (
+                <div className="mt-2 ml-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <div className="flex items-center text-green-300 text-sm">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Conversation complete - here are your personalized recommendations!
+                  </div>
+                </div>
+              )}
+              
+              {/* Show user preferences if available */}
+              {!message.isUser && message.userPreferences && (
+                <div className="mt-2 ml-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                  <div className="text-purple-300 text-sm">
+                    <div className="font-semibold mb-1">Learned Preferences:</div>
+                    <div className="space-y-1">
+                      {message.userPreferences.genre && (
+                        <div>🎭 Genre: {message.userPreferences.genre}</div>
+                      )}
+                      {message.userPreferences.mood && (
+                        <div>😊 Mood: {message.userPreferences.mood}</div>
+                      )}
+                      {message.userPreferences.actors && (
+                        <div>🎬 Actors: {message.userPreferences.actors}</div>
+                      )}
+                      {message.userPreferences.year && (
+                        <div>📅 Year: {message.userPreferences.year}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {/* Show movie recommendations for AI messages */}
               {!message.isUser && message.singleRecommendation && (
                 <div className="mt-4 ml-4">
@@ -269,7 +311,9 @@ export function ChatWindow({
         {isLoadingRecommendation && (
           <div className="flex items-center space-x-2 p-4 bg-gray-700/50 rounded-xl ml-4">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
-            <span className="text-gray-300">Finding movies for you...</span>
+            <span className="text-gray-300">
+              {isAskingQuestion ? 'Processing your response...' : 'Finding movies for you...'}
+            </span>
           </div>
         )}
         
@@ -302,6 +346,22 @@ export function ChatWindow({
           </button>
         </div>
         
+        {/* Fallback text input for testing */}
+        <div className="mt-4 text-center">
+          <p className="text-gray-400 text-sm mb-2">Or type your message:</p>
+          <input
+            type="text"
+            placeholder="Type your message here..."
+            className="w-full max-w-md px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500"
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                onTranscription(e.currentTarget.value.trim())
+                e.currentTarget.value = ''
+              }
+            }}
+          />
+        </div>
+        
         {isRecording && (
           <div className="text-center mt-4">
             <div className="flex items-center justify-center space-x-2">
@@ -313,6 +373,33 @@ export function ChatWindow({
               <p className="text-orange-300 font-semibold">
                 Listening... Speak now!
               </p>
+            </div>
+          </div>
+        )}
+        
+        {/* Conversation status indicator */}
+        {isAskingQuestion && !isRecording && (
+          <div className="text-center mt-4">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-full">
+              <svg className="w-4 h-4 text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-blue-300 text-sm font-medium">
+                AI is asking a question - please respond
+              </span>
+            </div>
+          </div>
+        )}
+        
+        {conversationComplete && (
+          <div className="text-center mt-4">
+            <div className="inline-flex items-center px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
+              <svg className="w-4 h-4 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-green-300 text-sm font-medium">
+                Conversation complete! You can start a new chat anytime.
+              </span>
             </div>
           </div>
         )}

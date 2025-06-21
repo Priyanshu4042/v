@@ -48,4 +48,60 @@ This will start the Next.js app on http://localhost:3000
 - ✅ Auto-triggered movie recommendations
 - ✅ Hardcoded mood (3/5)
 - ✅ Error handling and loading states
-- ✅ Responsive UI design 
+- ✅ Responsive UI design
+
+# Setup Guide for Fire TV Movie Bot
+
+## 🔑 Google API Key Setup
+
+The backend requires a Google Gemini API key to generate personalized movie recommendations. Without it, the system will use fallback recommendations.
+
+### How to Get a Google API Key:
+
+1. **Go to Google AI Studio**: https://makersuite.google.com/app/apikey
+2. **Sign in** with your Google account
+3. **Create a new API key**
+4. **Copy the API key**
+
+### How to Set the API Key:
+
+#### Option 1: Environment Variable (Recommended)
+Create a `.env.local` file in your project root:
+```bash
+GOOGLE_API_KEY=your_actual_api_key_here
+```
+
+#### Option 2: Direct in Code (Not recommended for production)
+Edit `movie_recommender.py` and replace line 12:
+```python
+genai.configure(api_key='your_actual_api_key_here')
+```
+
+### Restart the Backend
+After setting the API key, restart the Python backend:
+```bash
+python movie_recommender.py
+```
+
+## 🎯 What Happens Without API Key:
+
+- ✅ **Conversation works**: AI will still ask questions and learn preferences
+- ✅ **Fallback recommendations**: Curated movie lists based on detected preferences
+- ❌ **No AI-generated recommendations**: Won't use Gemini for personalized suggestions
+
+## 🎬 Current Features (Works Without API Key):
+
+1. **Interactive Conversations**: AI asks about genre, mood, actors
+2. **Preference Learning**: Detects and stores user preferences
+3. **Fallback Recommendations**: Curated lists for each genre
+4. **Session Management**: Maintains conversation context
+5. **Speech-to-Text**: Voice input functionality
+
+## 🚀 To Get Full AI Recommendations:
+
+Set up the Google API key as described above to enable:
+- **AI-generated personalized recommendations**
+- **Dynamic movie suggestions based on conversation**
+- **More sophisticated preference analysis**
+
+The system works great even without the API key, but with it, you get the full AI-powered experience! 

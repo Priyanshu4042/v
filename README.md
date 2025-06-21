@@ -1,111 +1,199 @@
-# Speech to Text App
+# Fire TV Movie Bot - Interactive AI Movie Recommendations
 
-A Next.js application that uses the browser's Web Speech API to transcribe speech into text in real-time.
+A sophisticated speech-to-text movie recommendation app with interactive AI conversations, built with Next.js, TypeScript, and Python Flask.
 
-## Features
+## 🎯 Features
 
-- **Real-time Speech Recording**: Click to start/stop recording your voice
-- **Web Speech API Integration**: Real-time speech-to-text transcription using your browser
-- **Modern UI**: Clean, responsive interface with visual feedback
-- **Live Status Updates**: Visual indicators for recording states
-- **Transcription Management**: View, accumulate, and clear transcriptions
+### 🎤 Speech-to-Text Integration
+- Real-time speech transcription using Web Speech API
+- Voice-activated movie recommendations
+- Fire TV-style interface with dark theme and orange accents
 
-## Setup
+### 🤖 Interactive AI Conversations
+- **Multi-turn conversations** with contextual learning
+- **Session-based memory** (no persistent storage)
+- **Dynamic preference learning** through natural dialogue
+- **Intelligent questioning** to understand user preferences
 
-### 1. Install Dependencies
+### 🎬 Smart Movie Recommendations
+- **Personalized recommendations** based on learned preferences
+- **10-movie lists** generated after conversation completion
+- **Genre, mood, actor, and year preference detection**
+- **Contextual learning** throughout the conversation
 
+### 💬 Conversation Flow
+1. **Initial Greeting** - AI welcomes user and asks about genre preferences
+2. **Genre Discovery** - AI learns user's preferred movie genres
+3. **Mood Assessment** - AI asks about current mood and desired atmosphere
+4. **Actor Preferences** - AI inquires about favorite actors/actresses
+5. **Final Recommendations** - AI provides 10 personalized movie suggestions
+
+### 🎨 Modern UI/UX
+- **Fire TV-inspired design** with dark theme
+- **Chat bubble interface** for natural conversation flow
+- **Movie cards** displaying recommendations
+- **Real-time status indicators** for conversation progress
+- **Responsive design** for various screen sizes
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ and npm
+- Python 3.8+
+- Google Gemini API key
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd v
+   ```
+
+2. **Install frontend dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Install Python dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables**
+   ```bash
+   # Create .env.local file
+   echo "GOOGLE_API_KEY=your_gemini_api_key_here" > .env.local
+   ```
+
+5. **Start the Python backend**
+   ```bash
+   python movie_recommender.py
+   ```
+
+6. **Start the Next.js frontend**
+   ```bash
+   npm run dev
+   ```
+
+7. **Open your browser**
+   Navigate to `http://localhost:3000`
+
+## 🎭 How It Works
+
+### Interactive Conversation System
+The AI engages in natural conversations to understand user preferences:
+
+1. **Genre Learning**: "What genre do you usually enjoy?"
+2. **Mood Assessment**: "What mood are you in today?"
+3. **Actor Preferences**: "Do you have any favorite actors?"
+4. **Final Recommendations**: 10 personalized movies based on learned preferences
+
+### Session Management
+- **Session-only memory** - no data persistence
+- **Unique session IDs** for each conversation
+- **Context preservation** throughout the conversation
+- **Fresh start** with "Clear Chat" functionality
+
+### Preference Detection
+The AI automatically detects:
+- **Genres**: action, comedy, drama, horror, romance, sci-fi, thriller, documentary, animation, fantasy
+- **Moods**: happy, sad, excited, relaxed, stressed, romantic, adventurous, mysterious, funny, serious
+- **Years**: Any year mentioned (e.g., "movies from the 90s")
+- **Actors**: Popular actors and actresses
+
+## 🛠️ Technical Architecture
+
+### Frontend (Next.js + TypeScript)
+- **Components**: ChatWindow, ChatBubble, MovieCard, TranscriptionDisplay
+- **State Management**: React hooks for conversation state
+- **API Integration**: RESTful communication with Python backend
+- **Speech Recognition**: Web Speech API integration
+
+### Backend (Python Flask)
+- **Session Management**: In-memory session storage
+- **AI Integration**: Google Gemini API for recommendations
+- **Conversation Logic**: Multi-stage conversation flow
+- **Preference Analysis**: Natural language processing for preference detection
+
+### API Endpoints
+- `POST /api/movie-recommendation` - Process user input and generate responses
+- `POST /api/new-chat` - Start new conversation session
+
+## �� UI Components
+
+### Chat Interface
+- **User Messages**: Right-aligned chat bubbles
+- **AI Responses**: Left-aligned chat bubbles with status indicators
+- **Conversation Status**: Visual indicators for question asking and completion
+- **Preference Display**: Shows learned user preferences
+
+### Movie Recommendations
+- **Top Pick**: Highlighted single recommendation
+- **Movie Grid**: 10-movie recommendation display
+- **Movie Cards**: Individual movie cards with styling
+
+### Voice Interface
+- **Microphone Button**: Central voice activation
+- **Recording Status**: Visual feedback during recording
+- **Transcription Display**: Real-time speech-to-text
+
+## 🔧 Configuration
+
+### Environment Variables
 ```bash
-npm install
+GOOGLE_API_KEY=your_gemini_api_key_here
 ```
 
-### 2. Install Tailwind CSS
-
-```bash
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
+### Python Dependencies
+```
+flask
+flask-cors
+google-generativeai
 ```
 
-## Usage
-
-### 1. Start the Development Server
-
-```bash
-npm run dev
+### Frontend Dependencies
+```json
+{
+  "next": "^14.0.0",
+  "react": "^18.0.0",
+  "typescript": "^5.0.0",
+  "tailwindcss": "^3.0.0"
+}
 ```
 
-### 2. Open the Application
+## 🎯 Usage Examples
 
-Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
+### Example Conversation Flow
+```
+User: "I want to watch a movie"
+AI: "Hi! I'd love to help you find the perfect movie. What genre do you usually enjoy?"
 
-### 3. Grant Microphone Permissions
+User: "I like action movies"
+AI: "Great! I see you like action movies. What mood are you in today?"
 
-When you first click "Start Recording", your browser will ask for microphone permissions. Click "Allow" to enable recording.
+User: "I'm feeling excited"
+AI: "Perfect! An excited mood sounds great. Do you have any favorite actors?"
 
-### 4. Record and Transcribe
+User: "I like Tom Hanks"
+AI: "Perfect! Based on your preferences for action movies and your excited mood, here are some great recommendations for you!"
+[Shows 10 personalized movie recommendations]
+```
 
-- Click "Start Recording" to begin capturing audio
-- Speak clearly into your microphone
-- Your transcribed text will appear in real-time as you speak
-- Click "Stop Recording" when finished
+## 🚀 Deployment
 
-## Technical Details
+### Frontend Deployment
+```bash
+npm run build
+npm start
+```
 
-### Speech Recognition
-- Uses the browser's Web Speech API (`webkitSpeechRecognition`)
-- Real-time transcription as you speak
-- Automatically handles different languages and accents
+### Backend Deployment
+```bash
+python movie_recommender.py
+```
 
-### Transcription Process
-1. User clicks "Start Recording"
-2. Browser's speech recognition is activated
-3. Speech is transcribed in real-time
-4. Transcribed text is displayed immediately
-
-### UI States
-- **Inactive**: Ready to start recording (blue microphone icon)
-- **Recording**: Currently capturing audio (red pulsing microphone icon)
-
-## Browser Compatibility
-
-This app works best in modern browsers that support:
-- Web Speech API (`webkitSpeechRecognition`)
-- Modern JavaScript features
-
-Recommended browsers:
-- Chrome 25+
-- Safari 14+
-- Edge 79+
-
-Note: Firefox does not support the Web Speech API, so this app works best in Chrome and Safari.
-
-## Dependencies
-
-- **Next.js 14**: React framework for production
-- **React 18**: UI library
-- **Tailwind CSS**: Utility-first CSS framework
-- **TypeScript**: Type safety and better development experience
-
-## Troubleshooting
-
-### Microphone Access Issues
-- Ensure your browser has microphone permissions
-- Check that no other applications are using the microphone
-- Try refreshing the page and granting permissions again
-
-### Speech Recognition Issues
-- Speak clearly and at a moderate pace
-- Reduce background noise
-- Ensure your microphone is working properly
-- Try using Chrome or Safari for best compatibility
-
-### Browser Compatibility
-- The Web Speech API is not supported in Firefox
-- Use Chrome or Safari for the best experience
-- Ensure you're using a modern browser version
-
-## Development
-
-To contribute to this project:
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -113,6 +201,15 @@ To contribute to this project:
 4. Test thoroughly
 5. Submit a pull request
 
-## License
+## 📝 License
 
-This project is open source and available under the MIT License. 
+This project is licensed under the MIT License.
+
+## 🎬 Future Enhancements
+
+- **Rating System**: Allow users to rate recommended movies
+- **Watch History**: Track watched movies (optional)
+- **Advanced Preferences**: More sophisticated preference learning
+- **Multi-language Support**: Support for multiple languages
+- **Mobile App**: Native mobile application
+- **Social Features**: Share recommendations with friends 

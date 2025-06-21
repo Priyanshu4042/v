@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { text } = await request.json()
+    const { text, sessionId, conversationHistory } = await request.json()
     
     if (!text) {
       return NextResponse.json(
@@ -11,13 +11,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Call the Python Flask service
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'No session ID provided' },
+        { status: 400 }
+      )
+    }
+
+    // Call the Python Flask service with conversation history
     const response = await fetch('http://localhost:5000/recommend', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ 
+        text, 
+        session_id: sessionId,
+        conversation_history: conversationHistory || []
+      }),
     })
 
     if (!response.ok) {
@@ -31,7 +42,12 @@ export async function POST(request: NextRequest) {
       tenRecommendations: data.ten_recommendations,
       input: data.input,
       mood: data.mood,
-      conversationCount: data.conversation_count
+      conversationCount: data.conversation_count,
+      sessionId: data.session_id,
+      aiResponse: data.ai_response,
+      isAskingQuestion: data.is_asking_question,
+      conversationComplete: data.conversation_complete,
+      userPreferences: data.user_preferences
     })
     
   } catch (error: any) {
