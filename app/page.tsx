@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { WebSpeechRecorder } from './components/WebSpeechRecorder'
-import { TranscriptionDisplay } from './components/TranscriptionDisplay'
-import { MovieRecommendation } from './components/MovieRecommendation'
+import { ChatWindow } from './components/ChatWindow'
 
 export default function Home() {
   const [transcription, setTranscription] = useState('')
@@ -63,44 +61,17 @@ export default function Home() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Speech to Movie Recommendations
-        </h1>
-        <p className="text-lg text-gray-600">
-          Speak about a movie plot or your mood, and get AI-powered movie recommendations!
-        </p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-        <div className="mb-6 text-center">
-          <p className="text-sm text-gray-600">
-            Real-time transcription using your browser's Web Speech API
-          </p>
-        </div>
-
-        <WebSpeechRecorder
-          onTranscription={handleTranscriptionComplete}
-          isRecording={isRecording}
-          setIsRecording={setIsRecording}
-        />
-      </div>
-
-      <div className="grid gap-8 md:grid-cols-2">
-        <TranscriptionDisplay
-          transcription={transcription}
-          onClear={handleClearTranscription}
-        />
-        
-        <MovieRecommendation
-          singleRecommendation={singleRecommendation}
-          tenRecommendations={tenRecommendations}
-          isLoading={isLoadingRecommendation}
-          error={recommendationError}
-          conversationCount={conversationCount}
-        />
-      </div>
-    </main>
+    <ChatWindow
+      onTranscription={handleTranscriptionComplete}
+      isRecording={isRecording}
+      setIsRecording={setIsRecording}
+      transcription={transcription}
+      singleRecommendation={singleRecommendation}
+      tenRecommendations={tenRecommendations}
+      isLoadingRecommendation={isLoadingRecommendation}
+      recommendationError={recommendationError}
+      conversationCount={conversationCount}
+      onClear={handleClearTranscription}
+    />
   )
 } 

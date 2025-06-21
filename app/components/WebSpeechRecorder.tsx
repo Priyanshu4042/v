@@ -13,7 +13,7 @@ export function WebSpeechRecorder({
   isRecording,
   setIsRecording,
 }: WebSpeechRecorderProps) {
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const recognitionRef = useRef<any>(null)
   const [isSupported, setIsSupported] = useState(false)
 
   useEffect(() => {
@@ -21,14 +21,14 @@ export function WebSpeechRecorder({
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       setIsSupported(true)
       
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
       const recognition = new SpeechRecognition()
       
       recognition.continuous = true
       recognition.interimResults = true
       recognition.lang = 'en-US'
       
-      recognition.onresult = (event) => {
+      recognition.onresult = (event: any) => {
         let finalTranscript = ''
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -43,7 +43,7 @@ export function WebSpeechRecorder({
         }
       }
       
-      recognition.onerror = (event) => {
+      recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error)
         setIsRecording(false)
       }
@@ -73,25 +73,35 @@ export function WebSpeechRecorder({
   if (!isSupported) {
     return (
       <div className="text-center">
-        <p className="text-red-600 mb-4">
-          Web Speech API is not supported in your browser.
-        </p>
+        <div className="p-6 bg-red-900/20 border border-red-500/30 rounded-xl">
+          <svg className="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-red-300 text-lg font-semibold mb-2">
+            Browser Not Supported
+          </p>
+          <p className="text-red-200">
+            Web Speech API is not supported in your browser.
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="text-center">
-      <div className="mb-6">
+      <div className="mb-8">
         <div 
-          className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 ${
+          className={`w-32 h-32 mx-auto rounded-full flex items-center justify-center mb-6 transition-all duration-300 ${
             isRecording 
-              ? 'bg-red-100 border-4 border-red-500 pulse-animation' 
-              : 'bg-green-100 border-4 border-green-500'
+              ? 'bg-orange-500/20 border-4 border-orange-500 pulse-animation shadow-2xl shadow-orange-500/50' 
+              : 'bg-gray-700 border-4 border-gray-600 hover:border-orange-500 hover:bg-gray-600'
           }`}
         >
           <svg 
-            className={`w-12 h-12 ${isRecording ? 'text-red-600' : 'text-green-600'}`} 
+            className={`w-16 h-16 transition-colors duration-300 ${
+              isRecording ? 'text-orange-400' : 'text-gray-300'
+            }`} 
             fill="currentColor" 
             viewBox="0 0 20 20"
           >
@@ -106,20 +116,36 @@ export function WebSpeechRecorder({
 
       <button
         onClick={isRecording ? stopRecording : startRecording}
-        className={`btn ${isRecording ? 'btn-danger' : 'btn btn-secondary'}`}
+        className={`btn text-xl px-8 py-4 ${
+          isRecording 
+            ? 'btn-danger' 
+            : 'btn-primary'
+        }`}
       >
-        {isRecording ? 'Stop Recording (Web Speech)' : 'Start Recording (Web Speech Fallback)'}
+        <svg className={`w-6 h-6 mr-3 ${isRecording ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {isRecording ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          )}
+        </svg>
+        {isRecording ? 'Stop Listening' : 'Start Listening'}
       </button>
 
       {isRecording && (
-        <p className="mt-4 text-sm text-gray-600">
-          Speaking... Speech will be transcribed in real-time using your browser.
-        </p>
+        <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+          <div className="flex items-center justify-center space-x-2">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+              <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+            </div>
+            <p className="text-orange-300 font-semibold">
+              Listening... Speak now!
+            </p>
+          </div>
+        </div>
       )}
-      
-      <p className="mt-2 text-xs text-gray-500">
-        Using browser's Web Speech API (fallback mode)
-      </p>
     </div>
   )
 } 
